@@ -1,0 +1,53 @@
+name: 'Caching Steps'
+description: 'Reusable steps for cache'
+runs:
+  using: "composite"
+  steps:
+    - name: Clojure deps cache
+      uses: actions/cache@v2
+      with:
+        path: |
+          ~/.m2/repository
+          .lein-git-deps
+          .shadow-cljs
+        key: ${{ runner.os }}-maven-${{ hashFiles('shadow-cljs.edn') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+
+    - name: Cache node modules
+      id: node-cache
+      uses: actions/cache@v2
+      with:
+        path: |
+          ~/.npm
+          node_modules
+        key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+
+    - name: Cache Rails assets
+      uses: actions/cache@v2
+      with:
+        path: |
+          public/assets
+          public/packs
+          tmp/cache
+        key: ${{ runner.os }}-rails-assets-${{ env.GITHUB_REF_SLUG }}
+        restore-keys: |
+          ${{ runner.os }}-rails-assets-
+    
+    - name: Get cljs & javascript folder sha hash
+      id: get-cljs-javascript-sha-hash
+      shell: bash
+      run: |
+        echo "::set-output name=hash::$(find app/assets/cljs app/javascript -type f -print0 | sort -z | xargs -0 sha1sum | sha1sum | cut -d " " -f 1)"
+
+    - name: Cache cljs compiled data
+      id: cljs-assets-cache
+      uses: actions/cache@v2
+      with:
+        path: |
+          app/javascript/common/
+          target/
+          app/assets/javascripts/cljs
+        key: ${{ runner.os }}-cljs-assets-${{ steps.get-cljs-javascript-sha-hash.outputs.hash }}
