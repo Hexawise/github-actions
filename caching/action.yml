@@ -39,8 +39,9 @@ runs:
           public/assets
           public/packs
           tmp/cache
-        key: ${{ runner.os }}-rails-assets-${{ env.GITHUB_REF_SLUG }}
+        key: ${{ runner.os }}-rails-assets-${{ github.sha }}
         restore-keys: |
+          ${{ runner.os }}-rails-assets-${{ env.GITHUB_REF_SLUG }}
           ${{ runner.os }}-rails-assets-
     
     - name: Get cljs & javascript folder sha hash
