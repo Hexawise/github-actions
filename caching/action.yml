@@ -1,5 +1,12 @@
 name: 'Caching Steps'
 description: 'Reusable steps for cache'
+outputs:
+  node-assets-cache-hit:
+    description: 'Determines if Node assets cache exist'
+    value: ${{ steps.node-cache.outputs.cache-hit }}
+  cljs-assets-cache-hit:
+    description: 'Determines if CLJS assets cache exist'
+    value: ${{ steps.cljs-assets-cache.outputs.cache-hit }}
 runs:
   using: "composite"
   steps:
