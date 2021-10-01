@@ -37,7 +37,7 @@ runs:
     - name: Add profile credentials to ~/.aws/credentials
       shell: bash
       run: |
-        if [ -z "${{ inputs.aws-access-key-id-govcloud }}" ] && [ -z "${{ inputs.aws-secret-access-key-govcloud }}" ]
+        if [ ! -z "${{ inputs.aws-access-key-id-govcloud }}" ] && [ ! -z "${{ inputs.aws-secret-access-key-govcloud }}" ]
         then
           aws configure set aws_access_key_id ${{ inputs.aws-access-key-id-govcloud }} --profile govcloud
           aws configure set aws_secret_access_key ${{ inputs.aws-secret-access-key-govcloud }} --profile govcloud
