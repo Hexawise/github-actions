@@ -35,7 +35,6 @@ runs:
         aws-region: ${{ inputs.aws-region}}
 
     - name: Add profile credentials to ~/.aws/credentials
-      if: ${{ inputs.aws-access-key-id-govcloud != '' && inputs.aws-secret-access-key-govcloud != '' }}
       shell: bash
       run: |
         if [ -z "${{ inputs.aws-access-key-id-govcloud }}" ] && [ -z "${{ inputs.aws-secret-access-key-govcloud }}" ]
