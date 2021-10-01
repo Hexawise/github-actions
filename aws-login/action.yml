@@ -14,6 +14,16 @@ inputs:
     description: 'AWS Region'
     required: true
     default: us-east-1
+  aws-access-key-id-govcloud:
+    description: 'AWS GovCloud Access Key ID'
+    required: false
+  aws-secret-access-key-govcloud:
+    description: 'AWS GovCloud Secret Access Key'
+    required: false
+  aws-govcloud-region:
+    description: 'AWS Region'
+    required: false
+    default: us-gov-east-1
 runs:
   using: "composite"
   steps:
@@ -23,6 +33,13 @@ runs:
         aws-access-key-id: ${{ inputs.aws-access-key-id }}
         aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
         aws-region: ${{ inputs.aws-region}}
+
+    - name: Add profile credentials to ~/.aws/credentials
+      if: ${{ inputs.aws-access-key-id-govcloud != '' && inputs.aws-secret-access-key-govcloud != '' }}
+      run: |
+        aws configure set aws_access_key_id ${{ inputs.aws-access-key-id-govcloud }} --profile govcloud
+        aws configure set aws_secret_access_key ${{ inputs.aws-secret-access-key-govcloud }} --profile govcloud
+        aws configure set defaeult.region ${{ inputs.aws-govcloud-region }} --profile govcloud
 
     - name: Login to Amazon ECR
       id: login-ecr
