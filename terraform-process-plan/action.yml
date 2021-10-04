@@ -10,31 +10,33 @@ inputs:
 runs:
   using: "composite"
   steps:
-      - uses: hashicorp/setup-terraform@v1
-        with:
-          terraform_wrapper: false
+    - uses: hashicorp/setup-terraform@v1
+      with:
+        terraform_wrapper: false
 
-      - name: Terraform Init
-        id: init
-        run: terraform -chdir=./terraform/${{ inputs.group }} init
+    - name: Terraform Init
+      id: init
+      shell: bash
+      run: terraform -chdir=./terraform/${{ inputs.group }} init
 
-      - name: Terraform Validate
-        id: validate
-        run: terraform -chdir=./terraform/${{ inputs.group }} validate -no-color
+    - name: Terraform Validate
+      id: validate
+      shell: bash
+      run: terraform -chdir=./terraform/${{ inputs.group }} validate -no-color
 
-      - name: Terraform Plan
-        id: plan
-        run: |
-          set +e
-          terraform -chdir=./terraform/${{ inputs.group }} plan -no-color -detailed-exitcode
-          echo ::set-output name=exit_status::$?
-        continue-on-error: true
+    - name: Terraform Plan
+      id: plan
+      shell: bash
+      run: |
+        set +e
+        terraform -chdir=./terraform/${{ inputs.group }} plan -no-color -detailed-exitcode
+        echo ::set-output name=exit_status::$?
 
-      - uses: actions/github-script@v4
-        id: query-jobs
-        if: github.event_name == 'pull_request' && steps.plan.outputs.exit_status == 2
-        with:
-          script: |
+    - uses: actions/github-script@v4
+      id: query-jobs
+      with:
+        script: |
+          if("${{ github.event_name }}" === "pull_request" && ${{ steps.plan.outputs.exit_status }} === 2) {
             const result = await github.actions.listJobsForWorkflowRun({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -42,12 +44,13 @@ runs:
             });
 
             return result.data.jobs.find(function(job) { return job.name === "Create a plan for ${{ inputs.group }}" }).id;
+          }
 
-      - uses: actions/github-script@v4
-        if: github.event_name == 'pull_request' && steps.plan.outputs.exit_status == 2
-        with:
-          github-token: ${{ inputs.github_token }}
-          script: |
+    - uses: actions/github-script@v4
+      with:
+        github-token: ${{ inputs.github_token }}
+        script: |
+          if("${{ github.event_name }}" === "pull_request" && ${{ steps.plan.outputs.exit_status }} === 2) {
             const output = `#### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
             #### Terraform Validation 🤖${{ steps.validate.outputs.stdout }}
             #### Terraform Plan 📖\`Changes Pending\`
@@ -62,3 +65,4 @@ runs:
               repo: context.repo.repo,
               body: output
             })
+          }
