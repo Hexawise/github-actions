@@ -73,7 +73,7 @@ runs:
               repo: context.repo.repo
             })
 
-            console.log(comments[0].user)
+            console.log(result.data[0].user)
             # const commentsForGroup = result.data.filter(function(comment) { return comment.body.includes("Group: `${{ inputs.group }}`") })
             # commentsForGroup.forEach(function(comment) {
             #   github.issues.deleteComment({
