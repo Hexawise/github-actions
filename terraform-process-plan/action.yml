@@ -79,7 +79,7 @@ runs:
 
             const output = `Changes pending for Terraform plan in *terraform/${{ inputs.group }}*
 
-            ${{ format('{0}/checks?check_run_id={1}', github.event.pull_request._links.html.href, jobId) }}
+            ${{ format('{0}/checks?check_run_id=', github.event.pull_request._links.html.href) }}${jobId}
 
             *Pusher: @${{ github.actor }}, Group: \`${{ inputs.group }}\`*`;
 
