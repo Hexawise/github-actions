@@ -44,38 +44,32 @@ runs:
         echo "::endgroup::"
 
     - uses: actions/github-script@v4
-      id: query-jobs
       with:
+        github-token: ${{ inputs.github_token }}
         script: |
           if("${{ github.event_name }}" === "pull_request" && ${{ steps.plan.outputs.exit_status }} === 2) {
-            const result = await github.actions.listJobsForWorkflowRun({
+            // Get the list of jobs for this run
+            const jobsResult = await github.actions.listJobsForWorkflowRun({
               owner: context.repo.owner,
               repo: context.repo.repo,
               run_id: ${{ github.run_id }},
             });
 
-            return result.data.jobs.find(function(job) { return job.name === "Create a plan for ${{ inputs.group }}" }).id;
-          }
+            // From the list of jobs, grab the job id that applies to this particular job
+            const jobId = jobsResult.data.jobs.find(function(job) { return job.name === "Create a plan for ${{ inputs.group }}" }).id;
 
-    - uses: actions/github-script@v4
-      with:
-        github-token: ${{ inputs.github_token }}
-        script: |
-          if("${{ github.event_name }}" === "pull_request" && ${{ steps.plan.outputs.exit_status }} === 2) {
             // Get the list of comments
-            // Find the comment(s) by github-actions that have "Group: \`${{ inputs.group }}\`" in their body
-            // Delete these comments
-            // Create our new comment
-
-            const result = await github.issues.listComments({
+            const commentsResult = await github.issues.listComments({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo
             })
 
-            const commentsForGroup = result.data.filter(function(comment) { return comment.body.includes("Group: `${{ inputs.group }}`") && comment.user.login === "github-actions[bot]" })
+            // Find the comment(s) by github-actions[bod] that have "Group: \`${{ inputs.group }}\`" in their body
+            const commentsForGroup = commentsResult.data.filter(function(comment) { return comment.body.includes("Group: `${{ inputs.group }}`") && comment.user.login === "github-actions[bot]" })
+
+            // Delete these comments
             commentsForGroup.forEach(function(comment) {
-              console.log("deleting comment", comment)
               github.issues.deleteComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -83,14 +77,13 @@ runs:
               })
             })
 
-            const output = `#### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
-            #### Terraform Validation 🤖${{ steps.validate.outputs.stdout }}
-            #### Terraform Plan 📖\`Changes Pending\`
+            const output = `Changes pending for Terraform plan in *terraform/${{ inputs.group }}*
 
-            ${{ format('{0}/checks?check_run_id={1}', github.event.pull_request._links.html.href, steps.query-jobs.outputs.result) }}
+            ${{ format('{0}/checks?check_run_id={1}', github.event.pull_request._links.html.href, jobId) }}
 
-            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Group: \`${{ inputs.group }}\`*`;
+            *Pusher: @${{ github.actor }}, Group: \`${{ inputs.group }}\`*`;
 
+            // Create our new comment
             github.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
