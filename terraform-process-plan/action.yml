@@ -67,13 +67,21 @@ runs:
             // Delete these comments
             // Create our new comment
 
-            const comments = await github.issues.listComments({
+            const result = await github.issues.listComments({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo
             })
 
-            console.log(comments)
+            console.log(comments[0].user)
+            # const commentsForGroup = result.data.filter(function(comment) { return comment.body.includes("Group: `${{ inputs.group }}`") })
+            # commentsForGroup.forEach(function(comment) {
+            #   github.issues.deleteComment({
+            #     owner: context.repo.owner,
+            #     repo: context.repo.repo,
+            #     comment_id: comment.id
+            #   })
+            # })
 
             const output = `#### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
             #### Terraform Validation 🤖${{ steps.validate.outputs.stdout }}
