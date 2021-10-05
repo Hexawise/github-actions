@@ -17,7 +17,7 @@ runs:
     - name: Terraform Init
       id: init
       shell: bash
-      run: terraform -chdir=./terraform/${{ inputs.group }} init
+      run: terraform -chdir=./terraform/${{ inputs.group }} init > /dev/null
 
     - name: Terraform Validate
       id: validate
