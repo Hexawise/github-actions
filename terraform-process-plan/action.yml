@@ -62,6 +62,19 @@ runs:
         github-token: ${{ inputs.github_token }}
         script: |
           if("${{ github.event_name }}" === "pull_request" && ${{ steps.plan.outputs.exit_status }} === 2) {
+            // Get the list of comments
+            // Find the comment(s) by github-actions that have "Group: \`${{ inputs.group }}\`" in their body
+            // Delete these comments
+            // Create our new comment
+
+            const comments = await github.issues.listComments({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo
+            })
+
+            console.log(comments)
+
             const output = `#### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
             #### Terraform Validation 🤖${{ steps.validate.outputs.stdout }}
             #### Terraform Plan 📖\`Changes Pending\`
