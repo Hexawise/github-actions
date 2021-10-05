@@ -17,23 +17,31 @@ runs:
     - name: Terraform Init
       id: init
       shell: bash
-      run: terraform -chdir=./terraform/${{ inputs.group }} init > /dev/null
+      run: |
+        echo "::group::Terraform Init"
+        terraform -chdir=./terraform/${{ inputs.group }} init > /dev/null
+        echo "::endgroup::"
 
     - name: Terraform Validate
       id: validate
       shell: bash
-      run: terraform -chdir=./terraform/${{ inputs.group }} validate -no-color
+      run: |
+        echo "::group::Terraform Validate"
+        terraform -chdir=./terraform/${{ inputs.group }} validate -no-color
+        echo "::endgroup::"
 
     - name: Terraform Plan
       id: plan
       shell: bash
       run: |
+        echo "::group::Terraform Plan"
         set +e
         # terraform -chdir=./terraform/${{ inputs.group }} plan -no-color -detailed-exitcode
         terraform -chdir=./terraform/${{ inputs.group }} plan -no-color -detailed-exitcode -input=false -out=tfplan > /dev/null
         echo ::set-output name=exit_status::$?
         terraform -chdir=./terraform/${{ inputs.group }} show tfplan
         rm ./terraform/${{ inputs.group }}/tfplan
+        echo "::endgroup::"
 
     - uses: actions/github-script@v4
       id: query-jobs
