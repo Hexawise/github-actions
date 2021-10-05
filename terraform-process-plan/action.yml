@@ -65,7 +65,7 @@ runs:
               repo: context.repo.repo
             })
 
-            // Find the comment(s) by github-actions[bod] that have "Group: \`${{ inputs.group }}\`" in their body
+            // Find the comment(s) by github-actions[bot] that have "Group: \`${{ inputs.group }}\`" in their body
             const commentsForGroup = commentsResult.data.filter(function(comment) { return comment.body.includes("Group: `${{ inputs.group }}`") && comment.user.login === "github-actions[bot]" })
 
             // Delete these comments
@@ -77,9 +77,9 @@ runs:
               })
             })
 
-            const output = `Changes pending for Terraform plan in *terraform/${{ inputs.group }}*
+            const output = `Changes pending for Terraform plan in **terraform/${{ inputs.group }}**
 
-            ${{ format('{0}/checks?check_run_id=', github.event.pull_request._links.html.href) }}${jobId}
+            https://github.com/${{ github.repository }}/runs/${jobId}?check_suite_focus=true
 
             *Pusher: @${{ github.actor }}, Group: \`${{ inputs.group }}\`*`;
 
