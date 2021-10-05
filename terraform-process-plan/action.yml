@@ -29,8 +29,11 @@ runs:
       shell: bash
       run: |
         set +e
-        terraform -chdir=./terraform/${{ inputs.group }} plan -no-color -detailed-exitcode
+        # terraform -chdir=./terraform/instances plan -no-color -detailed-exitcode
+        terraform -chdir=./terraform/instances plan -no-color -detailed-exitcode -input=false -out=tfplan > /dev/null
         echo ::set-output name=exit_status::$?
+        terraform -chdir=./terraform/instances show tfplan
+        rm ./terraform/instances/tfplan
 
     - uses: actions/github-script@v4
       id: query-jobs
