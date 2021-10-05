@@ -74,14 +74,14 @@ runs:
             })
 
             console.log(result.data[0].user)
-            # const commentsForGroup = result.data.filter(function(comment) { return comment.body.includes("Group: `${{ inputs.group }}`") })
-            # commentsForGroup.forEach(function(comment) {
-            #   github.issues.deleteComment({
-            #     owner: context.repo.owner,
-            #     repo: context.repo.repo,
-            #     comment_id: comment.id
-            #   })
-            # })
+            // const commentsForGroup = result.data.filter(function(comment) { return comment.body.includes("Group: `${{ inputs.group }}`") })
+            // commentsForGroup.forEach(function(comment) {
+            //   github.issues.deleteComment({
+            //     owner: context.repo.owner,
+            //     repo: context.repo.repo,
+            //     comment_id: comment.id
+            //   })
+            // })
 
             const output = `#### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
             #### Terraform Validation 🤖${{ steps.validate.outputs.stdout }}
