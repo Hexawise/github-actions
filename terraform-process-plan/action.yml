@@ -24,7 +24,7 @@ runs:
     - name: Check for Terraform Targetting
       id: targeting
       shell: bash
-      run: echo ::set-output name=group-targeting::${{ needs.pre_run.outputs.commit_message }} | grep -oP "(?<=${{ inputs.group }}::)([^\n\r\s]+)"
+      run: echo ::set-output name=group-targeting::$(${{ needs.pre_run.outputs.commit_message }} | grep -oP "(?<=${{ inputs.group }}::)([^\n\r\s]+)")
 
     - name: Terraform Init
       id: init
