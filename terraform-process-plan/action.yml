@@ -40,8 +40,12 @@ runs:
       run: |
         echo "::group::Terraform Plan"
         set +e
-        echo ${{ steps.targeting.outputs.group-targeting }}
-        terraform -chdir=./terraform/${{ inputs.group }} plan -no-color -detailed-exitcode -input=false -out=tfplan > /dev/null
+        if [ ! -z "${{ steps.targeting.outputs.group-targeting }}" ]
+        then
+          terraform -chdir=./terraform/${{ inputs.group }} plan -target=${{ steps.targeting.outputs.group-targeting }} -no-color -detailed-exitcode -input=false -out=tfplan > /dev/null
+        else
+          terraform -chdir=./terraform/${{ inputs.group }} plan -no-color -detailed-exitcode -input=false -out=tfplan > /dev/null
+        fi
         echo ::set-output name=exit-status::$?
         terraform -chdir=./terraform/${{ inputs.group }} show tfplan
         rm ./terraform/${{ inputs.group }}/tfplan
