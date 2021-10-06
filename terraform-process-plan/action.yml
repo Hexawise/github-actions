@@ -7,6 +7,10 @@ inputs:
   github_token:
     description: 'Github Token'
     required: true
+outputs:
+  exit-status:
+    description: 'Terraform Plan Exit Code'
+    value: ${{ steps.plan.outputs.exit-status}}
 runs:
   using: "composite"
   steps:
@@ -36,9 +40,8 @@ runs:
       run: |
         echo "::group::Terraform Plan"
         set +e
-        # terraform -chdir=./terraform/${{ inputs.group }} plan -no-color -detailed-exitcode
         terraform -chdir=./terraform/${{ inputs.group }} plan -no-color -detailed-exitcode -input=false -out=tfplan > /dev/null
-        echo ::set-output name=exit_status::$?
+        echo ::set-output name=exit-status::$?
         terraform -chdir=./terraform/${{ inputs.group }} show tfplan
         rm ./terraform/${{ inputs.group }}/tfplan
         echo "::endgroup::"
@@ -47,7 +50,7 @@ runs:
       with:
         github-token: ${{ inputs.github_token }}
         script: |
-          if("${{ github.event_name }}" === "pull_request" && ${{ steps.plan.outputs.exit_status }} === 2) {
+          if("${{ github.event_name }}" === "pull_request" && ${{ steps.plan.outputs.exit-status }} === 2) {
             // Get the list of jobs for this run
             const jobsResult = await github.actions.listJobsForWorkflowRun({
               owner: context.repo.owner,
