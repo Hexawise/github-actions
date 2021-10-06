@@ -26,14 +26,6 @@ runs:
         terraform -chdir=./terraform/${{ inputs.group }} init > /dev/null
         echo "::endgroup::"
 
-    - name: Terraform Validate
-      id: validate
-      shell: bash
-      run: |
-        echo "::group::Terraform Validate"
-        terraform -chdir=./terraform/${{ inputs.group }} validate -no-color
-        echo "::endgroup::"
-
     - name: Terraform Plan
       id: plan
       shell: bash
