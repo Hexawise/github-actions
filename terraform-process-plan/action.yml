@@ -11,9 +11,6 @@ outputs:
   exit-status:
     description: 'Terraform Plan Exit Code'
     value: ${{ steps.plan.outputs.exit-status }}
-  output-test:
-    description: 'General output test'
-    value: ${{ steps.plan.outputs.output-test }}
 runs:
   using: "composite"
   steps:
@@ -45,7 +42,6 @@ runs:
         set +e
         terraform -chdir=./terraform/${{ inputs.group }} plan -no-color -detailed-exitcode -input=false -out=tfplan > /dev/null
         echo ::set-output name=exit-status::$?
-        echo ::set-output name=output-test::$(echo $RANDOM)
         terraform -chdir=./terraform/${{ inputs.group }} show tfplan
         rm ./terraform/${{ inputs.group }}/tfplan
         echo "::endgroup::"
