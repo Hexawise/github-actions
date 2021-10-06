@@ -7,6 +7,9 @@ inputs:
   github_token:
     description: 'Github Token'
     required: true
+  commit_message:
+    description: 'Git Commit Message'
+    required: true
 outputs:
   exit-status:
     description: 'Terraform Plan Exit Code'
@@ -17,6 +20,11 @@ runs:
     - uses: hashicorp/setup-terraform@v1
       with:
         terraform_wrapper: false
+
+    - name: Check for Terraform Targetting
+      id: targeting
+      shell: bash
+      run: echo ::set-output name=group-targeting::${{ needs.pre_run.outputs.commit_message }} | grep -oP "(?<=${{ inputs.group }}::)([^\n\r\s]+)"
 
     - name: Terraform Init
       id: init
@@ -32,6 +40,7 @@ runs:
       run: |
         echo "::group::Terraform Plan"
         set +e
+        echo ${{ steps.targeting.outputs.group-targeting }}
         terraform -chdir=./terraform/${{ inputs.group }} plan -no-color -detailed-exitcode -input=false -out=tfplan > /dev/null
         echo ::set-output name=exit-status::$?
         terraform -chdir=./terraform/${{ inputs.group }} show tfplan
