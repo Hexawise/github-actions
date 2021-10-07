@@ -46,7 +46,7 @@ runs:
         # to the base command our -target=<group>
         if [ ! -z "${{ steps.targeting.outputs.group-targeting }}" ]
         then
-          IFS=',' read -ra TARGET <<< ${{ steps.targeting.outputs.group-targeting }}
+          IFS=',' read -ra TARGET <<< "${{ steps.targeting.outputs.group-targeting }}"
           for i in "${TARGET[@]}"; do
             BASE="$BASE -target=$i"
           done
