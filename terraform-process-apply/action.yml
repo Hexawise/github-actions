@@ -7,12 +7,24 @@ inputs:
   github_token:
     description: 'Github Token'
     required: true
+  commit_message:
+    description: 'Git Commit Message'
+    required: true
+outputs:
+  exit-status:
+    description: 'Terraform Apply Exit Code'
+    value: ${{ steps.apply.outputs.exit-status }}
 runs:
   using: "composite"
   steps:
     - uses: hashicorp/setup-terraform@v1
       with:
         terraform_wrapper: false
+
+    - name: Check for Terraform Targetting
+      id: targeting
+      shell: bash
+      run: echo ::set-output name=group-targeting::$(echo "${{ inputs.commit_message }}" | grep -oP "(?<=${{ inputs.group }}::)([^\n\r\s]+)")
 
     - name: Terraform Init
       id: init
@@ -26,6 +38,25 @@ runs:
       id: apply
       shell: bash
       run: |
-        echo "::group::Terraform Apply"
-        terraform -chdir=./terraform/${{ inputs.group }} apply -no-color -input=false -auto-approve
+        # Set our base command
+        BASE="terraform -chdir=./terraform/${{ inputs.group }} apply -no-color -input=false -auto-approve"
+
+        # If we have any targets for this input group then split them out by commas and append
+        # to the base command our -target=<group>
+        if [ ! -z "${{ steps.targeting.outputs.group-targeting }}" ]
+        then
+          echo "::group::Terraform Apply [${{inputs.group}}::${{ steps.targeting.outputs.group-targeting }}]"
+          IFS=',' read -ra TARGET <<< "${{ steps.targeting.outputs.group-targeting }}"
+          for i in "${TARGET[@]}"; do
+            BASE="$BASE -target=$i"
+          done
+        else
+          echo "::group::Terraform Apply [${{inputs.group}}::Full]"
+        fi
+
+        # Run our command and set the output to an exit-status variable
+        # eval $BASE
+        echo "Running command $BASE"
+        echo ::set-output name=exit-status::$?
+
         echo "::endgroup::"
