@@ -52,6 +52,7 @@ runs:
           done
         fi
         # Run our command
+        echo "Running command $BASE"
         $($BASE) > /dev/null
         echo ::set-output name=exit-status::$?
         terraform -chdir=./terraform/${{ inputs.group }} show tfplan
