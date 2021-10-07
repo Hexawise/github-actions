@@ -38,21 +38,22 @@ runs:
       id: plan
       shell: bash
       run: |
-        echo "::group::Terraform Plan"
         # Set our base command
         BASE="terraform -chdir=./terraform/${{ inputs.group }} plan -no-color -detailed-exitcode -input=false -out=tfplan"
-        set +e
         # If we have any targets for this input group then split them out by commas and append
         # to the base command our -target=<group>
         if [ ! -z "${{ steps.targeting.outputs.group-targeting }}" ]
         then
+          echo "::group::Terraform Plan [${{inputs.group}}::${{ steps.targeting.outputs.group-targeting }}]"
           IFS=',' read -ra TARGET <<< "${{ steps.targeting.outputs.group-targeting }}"
           for i in "${TARGET[@]}"; do
             BASE="$BASE -target=$i"
           done
+        else
+          echo "::group::Terraform Plan [${{inputs.group}}::Full]"
         fi
+        set +e
         # Run our command
-        echo "Running command $BASE"
         eval $BASE > /dev/null
         echo ::set-output name=exit-status::$?
         terraform -chdir=./terraform/${{ inputs.group }} show tfplan
