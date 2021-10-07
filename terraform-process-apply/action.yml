@@ -55,8 +55,7 @@ runs:
         fi
 
         # Run our command and set the output to an exit-status variable
-        # eval $BASE
-        echo "Running command $BASE"
+        eval $BASE
         echo ::set-output name=exit-status::$?
 
         echo "::endgroup::"
