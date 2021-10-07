@@ -54,6 +54,9 @@ runs:
           echo "::group::Terraform Plan [${{inputs.group}}::Full]"
         fi
 
+        # Ensure we don't error out for our detailed exit codes
+        set +e
+
         # Run our command and set the output to an exit-status variable
         eval $BASE > /dev/null
         echo ::set-output name=exit-status::$?
