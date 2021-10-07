@@ -53,7 +53,7 @@ runs:
         fi
         # Run our command
         echo "Running command $BASE"
-        $($BASE) > /dev/null
+        eval $BASE > /dev/null
         echo ::set-output name=exit-status::$?
         terraform -chdir=./terraform/${{ inputs.group }} show tfplan
         rm ./terraform/${{ inputs.group }}/tfplan
