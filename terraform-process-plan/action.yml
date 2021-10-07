@@ -40,6 +40,7 @@ runs:
       run: |
         # Set our base command
         BASE="terraform -chdir=./terraform/${{ inputs.group }} plan -no-color -detailed-exitcode -input=false -out=tfplan"
+
         # If we have any targets for this input group then split them out by commas and append
         # to the base command our -target=<group>
         if [ ! -z "${{ steps.targeting.outputs.group-targeting }}" ]
@@ -52,10 +53,12 @@ runs:
         else
           echo "::group::Terraform Plan [${{inputs.group}}::Full]"
         fi
-        set +e
-        # Run our command
+
+        # Run our command and set the output to an exit-status variable
         eval $BASE > /dev/null
         echo ::set-output name=exit-status::$?
+
+        # Show our plan and then remove the generated file
         terraform -chdir=./terraform/${{ inputs.group }} show tfplan
         rm ./terraform/${{ inputs.group }}/tfplan
         echo "::endgroup::"
@@ -64,10 +67,12 @@ runs:
       with:
         github-token: ${{ inputs.github_token }}
         script: |
+          // If our exit status is 1, an error occurred, so throw and bail
           if(${{ steps.plan.outputs.exit-status }} === 1) {
             throw "The Terraform Plan operation did not complete successfully."
           }
 
+          // Otherwise, ensure this is a PR and that our exit status from the terraform command is 2, indicating changes
           if("${{ github.event_name }}" === "pull_request" && ${{ steps.plan.outputs.exit-status }} === 2) {
             // Get the list of jobs for this run
             const jobsResult = await github.actions.listJobsForWorkflowRun({
@@ -98,6 +103,7 @@ runs:
               })
             })
 
+            // Generate the content for our comment
             const output = `Changes pending for Terraform plan in **terraform/${{ inputs.group }}**
 
             https://github.com/${{ github.repository }}/runs/${jobId}?check_suite_focus=true
