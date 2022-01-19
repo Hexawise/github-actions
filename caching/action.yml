@@ -38,6 +38,7 @@ runs:
         path: |
           public/assets
           public/packs
+          public/packs-test
           tmp/cache
         key: ${{ runner.os }}-rails-assets-${{ github.sha }}
         restore-keys: |
