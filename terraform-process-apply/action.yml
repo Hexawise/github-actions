@@ -10,6 +10,9 @@ inputs:
   commit_message:
     description: 'Git Commit Message'
     required: true
+  terraform_version:
+    description: 'Terraform Version'
+    required: true
 outputs:
   exit-status:
     description: 'Terraform Apply Exit Code'
@@ -20,6 +23,7 @@ runs:
     - uses: hashicorp/setup-terraform@v1
       with:
         terraform_wrapper: false
+        terraform_version: ${{ inputs.terraform_version }}
 
     - name: Check for Terraform Targetting
       id: targeting
