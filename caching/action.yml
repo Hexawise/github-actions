@@ -60,4 +60,4 @@ runs:
           app/javascript/common/
           target/
           app/assets/javascripts/cljs
-        key: ${{ runner.os }}-cljs-assets-${{ CLJS_JS_HASH }}
+        key: ${{ runner.os }}-cljs-assets-${{ env.CLJS_JS_HASH }}
