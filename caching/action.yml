@@ -48,14 +48,16 @@ runs:
       id: get-cljs-javascript-sha-hash
       shell: bash
       run: |
-        echo "hash=$(find app/assets/cljs app/javascript -type f -print0 | sort -z | xargs -0 sha1sum | sha1sum | cut -d " " -f 1)" >> "$GITHUB_ENV"
+        echo "CLJS_JS_HASH=$(find app/assets/cljs app/javascript -type f -print0 | sort -z | xargs -0 sha1sum | sha1sum | cut -d " " -f 1)" >> "$GITHUB_OUTPUT"
 
     - name: Cache cljs compiled data
       id: cljs-assets-cache
       uses: actions/cache@v4
+      env:
+        CLJS_JS_HASH: ${{ steps.get-cljs-javascript-sha-hash.outputs.CLJS_JS_HASH }}
       with:
         path: |
           app/javascript/common/
           target/
           app/assets/javascripts/cljs
-        key: ${{ runner.os }}-cljs-assets-${{ steps.get-cljs-javascript-sha-hash.outputs.hash }}
+        key: ${{ runner.os }}-cljs-assets-${{ CLJS_JS_HASH }}
