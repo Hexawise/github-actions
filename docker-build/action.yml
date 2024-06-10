@@ -13,9 +13,7 @@ inputs:
     required: true
   image-tags:
     description: 'Tags to apply to built image'
-    default: |
-      ${{ inputs.aws-account }}.dkr.ecr.us-east-1.amazonaws.com/${{ inputs.aws-ecr-repo }}:${{ env.GITHUB_REF_SLUG }}-latest
-      ${{ inputs.aws-account }}.dkr.ecr.us-east-1.amazonaws.com/${{ inputs.aws-ecr-repo }}:${{ github.sha }}
+    required: true
   build-args:
     description: 'Docker Build Arguments'
 
@@ -41,6 +39,6 @@ runs:
         # Set the desired build target here
         push: true
         build-args: ${{ inputs.build-args }}
-        tags: ${{ inputs.image_tags }}
+        tags: ${{ inputs.image-tags }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
